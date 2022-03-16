@@ -12,16 +12,15 @@ using Microsoft.AspNetCore.Routing;
 namespace CoreCodeCamp.Controllers
 {
     [Route("api/v{version:apiVersion}/[controller]")] // Kein Hard-Code, damit der Name automatisch genommen wird. Es wird der Name vor Controller verwendet!
-    [ApiVersion("1.0")]
-    [ApiVersion("1.1")]
+    [ApiVersion("2.0")]
     [ApiController] // Teilt das System mit, dass es sich um eine API handeln soll
-    public class CampsController : ControllerBase
+    public class Camps2Controller : ControllerBase
     {
         private readonly ICampRepository _repository;
         private readonly IMapper _mapper;
         private readonly LinkGenerator _linkGenerator;
 
-        public CampsController(ICampRepository repository, IMapper mapper, LinkGenerator linkGenerator)
+        public Camps2Controller(ICampRepository repository, IMapper mapper, LinkGenerator linkGenerator)
         {
             _repository = repository;
             _mapper = mapper;
@@ -34,9 +33,12 @@ namespace CoreCodeCamp.Controllers
             try
             {
                 var results = await _repository.GetAllCampsAsync(includeTalks);
-                CampModel[] models = _mapper.Map<CampModel[]>(results);
-                /* Mapper vereinfachen die geholten Objekte, so können nicht-gebrauchte Attribute ausgelassen werden*/
-                return models;
+                var result = new
+                {
+                    Count = results.Count(),
+                    Results = _mapper.Map<CampModel[]>(results)
+                };
+                return Ok(result);
             } catch (Exception)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
@@ -44,25 +46,7 @@ namespace CoreCodeCamp.Controllers
         }
 
         [HttpGet("{moniker}")] // Hier machen wir klar, dass ein Camp nach moniker zurückgegeben werden soll
-        [MapToApiVersion("1.0")] // gehört zur Api Versioning
         public async Task<ActionResult<CampModel>> Get(string moniker)
-        {
-            try
-            {
-                var result = await _repository.GetCampAsync(moniker);
-
-                if (result == null) return NotFound(); // Abfrage wenn Camp nicht gefunden worden ist
-
-                return _mapper.Map<CampModel>(result);
-            }
-            catch (Exception)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
-            }
-        }
-
-        [HttpGet("{moniker}")] // Hier machen wir klar, dass ein Camp nach moniker zurückgegeben werden soll
-        public async Task<ActionResult<CampModel>> Get11(string moniker)
         {
             try
             {

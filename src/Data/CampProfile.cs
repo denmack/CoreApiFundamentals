@@ -14,7 +14,15 @@ namespace CoreCodeCamp.Data
         {
             this.CreateMap<Camp, CampModel>()
                 .ForMember(c => c.LocationVenueName, o => o.MapFrom(m => m.Location.VenueName));
-                // Hier wird aus dem Objekt Location der passende Location Name gemapt.
+            // Hier wird aus dem Objekt Location der passende Location Name gemapt.
+
+            this.CreateMap<Talk, TalkModel>()
+                .ReverseMap()
+                .ForMember(t => t.Camp, opt => opt.Ignore())
+                .ForMember(t => t.Speaker, opt => opt.Ignore());
+
+            this.CreateMap<Speaker, SpeakerModel>()
+                .ReverseMap();
         }
     }
 }
